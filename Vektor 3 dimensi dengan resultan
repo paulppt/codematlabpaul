@@ -1,0 +1,25 @@
+%script vektor 3D
+v1=input('masukan vektor v1 :');
+v2=input('masukan vektor v2 :');
+v3=input('masukan vektor v3 :');
+
+vT=v1+v2+v3
+
+figure;
+quiver3(0,0,0,v1(1),v1(2),v1(3));
+hold on;
+
+quiver3(0,0,0,v2(1),v2(2),v2(3));
+hold on;
+
+quiver3(0,0,0,v3(1),v3(2),v3(3));
+hold on;
+
+quiver3(0,0,0,vT(1),vT(2),vT(3));
+hold on;
+
+%pemberian label sumbu
+xlabel('x-axis');
+ylabel('y-axis');
+zlabel('z-axis');
+title('vektor 3 dimensi')
