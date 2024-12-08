@@ -1,0 +1,34 @@
+clc;
+clear;
+a = input ('Matriks a = ');
+b = input ('Matriks b = ');
+clc;
+disp('Matriks a = ');
+disp(a);
+disp('Matriks b = ');
+disp(b);
+da = det(a);
+fprintf ('Determinan a = %d\n\n', da);
+[ba, ka] = size(a);
+[bb, kb] = size(b);
+if (ba==ka) & (bb==ba) & (kb==1)
+    if da~=0
+        mb = a;
+        for j=1:ba
+            for i=1:ba
+                mb(i,j) = b(i,1);
+            end
+            dmb = det(mb);
+            p = dmb/da;
+            fprintf('Matriks bantu ke %d =\n',j);
+            fprintf('Determinan = %d\n', dmb);
+            disp(mb);
+            fprintf('\nPenyelesaian ke %d = %.1f\n\n',j,p);
+            mb = a;
+        end
+    else
+        disp('Tidak ada penyelesaian');
+    end
+else
+    disp('Matriks Salah');
+end
