@@ -1,0 +1,24 @@
+%script vektor 2D
+v1=input('masukan vektor v1 :');
+v2=input('masukan vektor v2 :');
+
+vT=v1+v2
+
+figure;
+quiver(0,0,v1(1),v1(2),0);
+hold on;
+
+quiver(0,0,v2(1),v2(2),0);
+hold on;
+
+quiver(0,0,vT(1),vT(2),0);
+hold on;
+
+%bikin limit angka sumbu
+xlim([-10,10])
+ylim([-10,10])
+
+%pemberian label sumbu
+xlabel('x-axis');
+ylabel('y-axis');
+title('vektor 2 dimensi')
