@@ -1,0 +1,181 @@
+%SCRIPT SPRING ELEMENT PARALEL
+pegas=input('Jumlah pegas:');       % pegas adalah jumlah pegas 
+paralel=zeros(pegas);               % paralel berisi pegas mana saja yang diparalel
+pertanyaan=zeros(1,pegas+1);        % pertanyaan hanyalah trik coding yang tidak memiliki arti khusus
+pertanyaan1=input('Apakah ada pegas paralel? (1 untuk ya dan 0 untuk tidak):'); % pertanyaan1 adalah pernyataan dalam bentuk logika (1 atau 0) mengenai adanya pegas yang paralel atau tidak
+displacement=zeros(pegas*2,1);      % displacement adalah variabel untuk mempermudah proses perhitungan gaya internal dan berisi komponen matriks d yang diperlukan
+internal=zeros(pegas*2,1);          % internal adalah matriks gaya internal
+jumlah=0;                           % jumlah, jumlah2, s, p, q, pp, qq, jumlah3, jumlah5, jumlah7, dan jumlah 12 hanyalah trik coding yang tidak memiliki arti khusus
+jumlah2=0;
+s=0;
+p=1;
+q=0;
+pp=1;
+qq=0;
+jumlah3=0;
+jumlah5=0;
+jumlah7=0;
+jumlah12=0;
+if pertanyaan1==1           % Mulai mendata pegas-pegas yang diparalel
+    pertanyaan(1)=1;
+    for l=1:pegas
+        for m=1:pegas
+            paralel(l,m)=input('Pegas berapa yang diparalel (ketik 0 kalau sudah tidak ada yang diparalel di tempat yang dimaksud, harus berurutan):');
+            if paralel(l,m)==0
+                break
+            else
+                jumlah=jumlah+1;
+            end
+        end
+        pertanyaan(l+1)=input('Apakah masih ada pegas paralel di tempat lain? (1 untuk ya dan 0 untuk tidak):');
+        if pertanyaan(l+1)==0
+            break
+        end
+    end
+end
+n=pegas-(jumlah-(sum(pertanyaan)));     % n adalah data jumlah pegas setelah pegas yang disusun paralel digabung
+boundary=zeros(n+1,1);                  % boundary adalah daftar node di mana displacement-nya 0
+k=zeros(1,pegas);                       % k adalah kekakuan masing-masing pegas
+f=zeros(n+1,1);                         % f adalah gaya yang terjadi pada masing-masing node
+kotak=zeros(n+1);                       % kotak adalah matriks kotak yang menjadi penyelesaian persamaan gaya dan displacement
+d=zeros(n+1,1);                         % d adalah displacement yang terjadi pada masing-masing node
+for i=1:pegas
+    teksk="Kekakuan pegas "+i+": ";     % Saatnya memasukkan kekakuan masing-masing pegas
+    k(i)=input(teksk);
+end
+for o=1:n
+    if o+q==paralel(p,1)
+        for r=1:pegas
+            if r==1                     % Karena matriks solver hanya terdiri dari kekakuan, maka bisa langsung dimasukkan
+                [kotak(o,o),kotak(o+1,o+1),kotak(o,o+1),kotak(o+1,o)]=solver(kotak,o,k(paralel(p,r)));
+            elseif r>1 && paralel(p,r)~=0
+                [kotak(o,o),kotak(o+1,o+1),kotak(o,o+1),kotak(o+1,o)]=solver(kotak,o,k(paralel(p,r)));
+                q=q+1;
+            else
+                break
+            end
+        end
+        p=p+1;
+    else
+        [kotak(o,o),kotak(o+1,o+1),kotak(o,o+1),kotak(o+1,o)]=solver(kotak,o,k(o+q));
+    end
+end
+for a=1:n+1
+    boundary(a)=input('Dimanakah letak nodal pegas yang ditumpuan? (Untuk menambah nodal tinggal tekan "enter", kalau sudah tidak ada ketik 0):'); % Saatnya memasukkan node yang displacement-nya 0
+    if boundary(a)==0
+        break
+    else
+        jumlah5=jumlah5+1;
+    end
+end
+jumlah10=n+1-jumlah5;           % jumlah10 adalah variabel penting untuk proses reduksi
+for j=1:n+1
+    jumlah4=0;
+    for e=1:n+1
+        if j~=boundary(e)
+            jumlah4=jumlah4+1;
+        end
+    end
+    if jumlah4==n+1
+        teksf="Gaya eksternal di nodal "+j+": ";        % Saatnya memasukkan gaya yang diketahui
+        f(j)=input(teksf);
+    end
+end
+A=zeros(jumlah10);      % Memulai proses reduksi
+B=zeros(jumlah10,1);
+for b=1:n+1
+    jumlah6=0;
+    for g=1:n+1
+        if b~=boundary(g)
+            jumlah6=jumlah6+1;
+        else
+            jumlah7=jumlah7+1;
+            break
+        end
+    end
+    if jumlah6==n+1
+        bb=b-jumlah7;
+        if bb~=0
+            B(bb)=f(b);
+            jumlah9=0;
+            for h=1:n+1
+                jumlah8=0;
+                for hh=1:n+1
+                    if h~=boundary(hh)
+                        jumlah8=jumlah8+1;
+                    else
+                        jumlah9=jumlah9+1;
+                    end
+                end
+                h3=h-jumlah9;
+                if jumlah8==n+1 && h3~=0
+                    A(bb,h3)=kotak(b,h);
+                end
+            end
+        end
+    end
+end
+D=linsolve(A,B);        % D adalah hasil reduksi
+for c=1:n+1
+    jumlah11=0;
+    for u=1:n+1
+        if c~=boundary(u)
+            jumlah11=jumlah11+1;
+        else
+            jumlah12=jumlah12+1;
+        end
+    end
+    cc=c-jumlah12;
+    if jumlah11==n+1
+        d(c)=D(cc);         % Memasukkan hasil reduksi kembail ke matriks diplacement
+    end
+end
+for t=1:n                   % Coding untuk menyusun matriks displacement
+    tt=(t+qq-1)*2;
+    if t+qq==paralel(pp,1)
+        for v=1:pegas
+            if v==1
+                displacement(tt+1:tt+2)=d(paralel(pp,1)-(pp-1)*2:paralel(pp,1)+1-(pp-1)*2);
+            elseif v>1 && paralel(pp,v)~=0
+                qq=qq+1;
+                tt=(t+qq-1)*2;
+                displacement(tt+1:tt+2)=d(paralel(pp,1)-(pp-1)*2:paralel(pp,1)+1-(pp-1)*2);
+            else
+                break
+            end
+        end
+        pp=pp+1;
+    else
+        displacement(tt+1:tt+2)=d(t:t+1);
+    end
+end
+for w=1:pegas       % Saatnya menghitung gaya internal masing-masing elemen
+    ww=(w-1)*2;
+    lokal=[k(w) -k(w);-k(w) k(w)];
+    internal(ww+1:ww+2)=lokal*displacement(ww+1:ww+2);
+end
+disp('---HASIL GAYA DAN DISPLACEMENT---')       % Saatnya menampilkan hasil dari gaya dan displacement di setiap node
+for z=1:2*pegas
+    zz=mod(z,2);
+    if zz~=0        % Kalau ganjil berarti kiri dan sebaliknya
+        gaya('kiri',z/2+0.5,internal(z))
+    else
+        gaya('kanan',z/2,internal(z))
+    end
+end
+for x=1:n+1         % Coding untuk penampilan hasil displacement masing-masing node
+    teksd="Displacemnt di nodal "+x+" = "+d(x);
+    disp(teksd)
+end
+
+function gaya(lr,Z,F)   % Fungsi penampilan gaya internal
+teks="Gaya internal "+lr+" di pegas "+Z+" = "+F;
+disp(teks)
+end
+
+function [C,D,E,F]=solver(matriks,O,K)  % Fungsi untuk pembentukan matriks solver
+C=matriks(O,O)+K;
+D=matriks(O+1,O+1)+K;
+E=matriks(O,O+1)-K;
+F=matriks(O+1,O)-K;
+end
